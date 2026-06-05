@@ -1,17 +1,14 @@
 <!DOCTYPE html>
-<html lang="vi"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TikTok Authorization</title>
+<html lang="vi"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>TikTok Authorization</title>
 <style>body{font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;max-width:560px;margin:60px auto;padding:0 20px;text-align:center;color:#1a1a1a}.box{border:1px solid #e3e3e3;border-radius:14px;padding:28px}#msg{font-size:1.05rem;margin-top:12px}.ok{color:#138a36}.err{color:#c0341d}small{color:#888;display:block;margin-top:18px;word-break:break-all}</style></head>
 <body><div class="box"><h2>Đang hoàn tất kết nối TikTok…</h2><div id="msg">Vui lòng đợi vài giây.</div><small id="detail"></small></div>
 <script>
-var N8N_EXCHANGE_URL = "https://180-93-59-9.sslip.io/webhook/tiktok-oauth";
-var p = new URLSearchParams(location.search);
-var code = p.get("code"), state = p.get("state") || "", error = p.get("error");
-var msg = document.getElementById("msg"), detail = document.getElementById("detail");
-if (error) { msg.className="err"; msg.textContent="TikTok trả về lỗi: "+error; }
-else if (!code) { msg.className="err"; msg.textContent="Thiếu mã uỷ quyền (code). Hãy thử kết nối lại."; }
-else { fetch(N8N_EXCHANGE_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({code:code,state:state})})
-.then(function(r){return r.json().catch(function(){return {};});})
-.then(function(d){ msg.className="ok"; msg.textContent = (d&&(d.ok||d.success)) ? "✅ Kết nối TikTok thành công! Bạn có thể đóng tab này." : "Đã gửi mã uỷ quyền tới hệ thống. Kiểm tra n8n để xác nhận token."; })
-.catch(function(e){ msg.className="err"; msg.textContent="Không gửi được tới hệ thống. Kiểm tra URL webhook n8n."; detail.textContent=String(e); }); }
+var N8N_EXCHANGE_URL="https://180-93-59-9.sslip.io/webhook/tiktok-oauth";
+var REVIEW_URL="https://quavogia.github.io/tiktok-app/tiktok-review-publish.html?connected=1";
+var p=new URLSearchParams(location.search);
+var code=p.get("code");var state=p.get("state")||"";var error=p.get("error");
+var msg=document.getElementById("msg");var detail=document.getElementById("detail");
+if(error){msg.className="err";msg.textContent="TikTok trả về lỗi: "+error;}
+else if(!code){msg.className="err";msg.textContent="Thiếu mã uỷ quyền (code). Hãy thử kết nối lại.";}
+else{fetch(N8N_EXCHANGE_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({code:code,state:state})}).then(function(r){return r.json().catch(function(){return{};});}).then(function(d){msg.className="ok";msg.textContent="✅ Kết nối thành công! Đang chuyển sang trang đăng video…";setTimeout(function(){location.replace(REVIEW_URL);},1200);}).catch(function(e){msg.className="err";msg.textContent="Không gửi được tới hệ thống. Kiểm tra URL webhook n8n.";detail.textContent=String(e);});}
 </script></body></html>
