@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="vi"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>MonQua Automation — Review & Publish to TikTok</title>
+<style>:root{--b:#fe2c55;--bg:#f6f7f9;--card:#fff;--line:#e6e8eb;--mut:#6b7280}*{box-sizing:border-box}body{font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:#16181c;margin:0;padding:24px}.wrap{max-width:560px;margin:0 auto}h1{font-size:1.25rem;margin:0 0 4px}.sub{color:var(--mut);margin:0 0 18px;font-size:.9rem}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:16px}.creator{display:flex;align-items:center;gap:12px}.creator img{width:48px;height:48px;border-radius:50%;background:#ddd;object-fit:cover}.creator .name{font-weight:600}.creator .uname{color:var(--mut);font-size:.85rem}.row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}.row:last-child{border-bottom:none}label.lbl{font-weight:500}select{padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:#fff}.switch{position:relative;width:46px;height:26px;background:#cbd5e1;border-radius:999px;cursor:pointer;transition:.2s}.switch.on{background:var(--b)}.switch i{position:absolute;top:3px;left:3px;width:20px;height:20px;background:#fff;border-radius:50%;transition:.2s}.switch.on i{left:23px}textarea{width:100%;min-height:60px;border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit}.disc{font-size:.82rem;color:var(--mut);margin-top:6px}.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;background:var(--b);color:#fff;font-weight:700;font-size:1rem;cursor:pointer}.hide{display:none}.note{font-size:.8rem;color:var(--mut);text-align:center;margin-top:10px}.ok{color:#138a36}.err{color:#c0341d}</style></head>
+<body><div class="wrap">
+<h1>Review & Publish to TikTok</h1><p class="sub">MonQua Automation — đăng video của chính kênh mình lên TikTok của mình.</p>
+<div id="connectCard" class="card"><p>Bước 1 — Kết nối tài khoản TikTok của bạn để bắt đầu.</p><button class="btn" id="connectBtn">Connect TikTok</button><div class="note">Bạn sẽ được đưa tới màn hình ủy quyền chính thức của TikTok.</div></div>
+<div id="reviewCard" class="card hide">
+<div class="creator"><img id="avatar" alt="avatar"><div><div class="name" id="displayName">Đang tải…</div><div class="uname" id="userName">@—</div></div></div>
+<hr style="border:none;border-top:1px solid var(--line);margin:14px 0">
+<div class="row"><label class="lbl" for="privacy">Privacy</label><select id="privacy"><option value="PUBLIC_TO_EVERYONE">Public</option><option value="MUTUAL_FOLLOW_FRIENDS">Friends</option><option value="SELF_ONLY" selected>Only me</option></select></div>
+<div class="row"><label class="lbl">Allow Duet</label><div class="switch on" data-k="duet"><i></i></div></div>
+<div class="row"><label class="lbl">Allow Stitch</label><div class="switch on" data-k="stitch"><i></i></div></div>
+<div class="row"><label class="lbl">Allow Comment</label><div class="switch on" data-k="comment"><i></i></div></div>
+<div class="row"><label class="lbl">Your brand (organic)</label><div class="switch" data-k="brand_organic"><i></i></div></div>
+<div class="row"><label class="lbl">Branded content (paid)</label><div class="switch" data-k="brand_content"><i></i></div></div>
+<p class="disc">Nếu bật "Branded content", video sẽ được gắn nhãn quảng cáo theo chính sách TikTok. Bạn chịu trách nhiệm về tính chính xác của khai báo này.</p>
+<div style="margin:10px 0"><label class="lbl">Caption</label><textarea id="caption">Video của mình — đăng thử qua MonQua Automation. #fyp</textarea></div>
+<button class="btn" id="publishBtn">Publish to TikTok</button><div class="note" id="status"></div></div>
+</div>
+<script>
+var CLIENT_KEY="REPLACE_CLIENT_KEY";
+var REDIRECT_URI="https://quavogia.github.io/tiktok-app/tiktok-callback.html";
+var SCOPES="user.info.basic,video.upload";
+var N8N="https://180-93-59-9.sslip.io";
+function rnd(){return Math.random().toString(36).slice(2)+Date.now().toString(36);}
+document.querySelectorAll('.switch').forEach(function(s){s.addEventListener('click',function(){s.classList.toggle('on');});});
+function sw(k){var e=document.querySelector('.switch[data-k="'+k+'"]');return e?e.classList.contains('on'):false;}
+document.getElementById('connectBtn').addEventListener('click',function(){var st=rnd();try{sessionStorage.setItem('tt_state',st);}catch(e){}var url="https://www.tiktok.com/v2/auth/authorize/?client_key="+encodeURIComponent(CLIENT_KEY)+"&scope="+encodeURIComponent(SCOPES)+"&response_type=code&redirect_uri="+encodeURIComponent(REDIRECT_URI)+"&state="+encodeURIComponent(st);location.href=url;});
+var p=new URLSearchParams(location.search);
+if(p.get('connected')==='1'){document.getElementById('connectCard').classList.add('hide');document.getElementById('reviewCard').classList.remove('hide');
+fetch(N8N+"/webhook/tiktok-creator",{method:'GET'}).then(function(r){return r.json();}).then(function(d){if(d&&d.display_name)document.getElementById('displayName').textContent=d.display_name;if(d&&d.username)document.getElementById('userName').textContent="@"+d.username;if(d&&d.avatar_url)document.getElementById('avatar').src=d.avatar_url;}).catch(function(){document.getElementById('displayName').textContent="(không lấy được creator info — kiểm tra token n8n)";});}
+document.getElementById('publishBtn').addEventListener('click',function(){var st=document.getElementById('status');st.textContent="Đang đăng…";st.className="note";var payload={caption:document.getElementById('caption').value,privacy_level:document.getElementById('privacy').value,disable_duet:!sw('duet'),disable_stitch:!sw('stitch'),disable_comment:!sw('comment'),brand_organic_toggle:sw('brand_organic'),brand_content_toggle:sw('brand_content')};fetch(N8N+"/webhook/tiktok-publish",{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).then(function(r){return r.json().catch(function(){return {};});}).then(function(d){if(d&&(d.ok||d.publish_id)){st.textContent="✅ Đã gửi video lên TikTok (sandbox: chế độ riêng tư).";st.className="note ok";}else{st.textContent="Đã gửi yêu cầu. Kiểm tra n8n (cần token + client_secret).";st.className="note";}}).catch(function(e){st.textContent="Lỗi gọi hệ thống: "+e;st.className="note err";});});
+</script></body></html>
